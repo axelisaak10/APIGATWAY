@@ -23,7 +23,7 @@ module.exports = fp(async function (fastify, opts) {
     ],
     exposedHeaders: ["Set-Cookie", "Authorization", "X-Cache"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    preflightContinue: true,
+    preflightContinue: false,
     strictPreflight: false,
   };
 
