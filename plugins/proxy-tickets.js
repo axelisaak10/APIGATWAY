@@ -81,6 +81,17 @@ module.exports = fp(async function (fastify, opts) {
     }
   };
 
+  // Ping/wake-up para despertar el servicio de tikets en Render
+  fastify.register(require("@fastify/http-proxy"), {
+    upstream: TICKETS_SERVICE_URL,
+    prefix: `/${API_PREFIX || "api"}/tickets/ping`,
+    rewritePrefix: "/health",
+    http2: false,
+    replyOptions: {
+      rewriteRequestHeaders: rewriteHeaders,
+    },
+  });
+
   // Proxy para /api/tickets/estados -> /api/v1/estados (cacheable)
   fastify.register(require("@fastify/http-proxy"), {
     upstream: TICKETS_SERVICE_URL,
