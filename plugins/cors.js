@@ -9,35 +9,21 @@ module.exports = fp(async function (fastify, opts) {
     .map((o) => o.trim())
     .filter((o) => o);
 
-  const corsOptions = {
-    origin: origins.length > 0 ? origins : false,
-    credentials: true,
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Cookie",
-      "X-Requested-With",
-      "Accept",
-      "Origin",
-      "Access-Control-Request-Method",
-      "Access-Control-Request-Headers",
-    ],
-    exposedHeaders: ["Set-Cookie", "Authorization", "X-Cache"],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    preflightContinue: false,
-    strictPreflight: false,
-  };
+  // Intercepta TODAS las peticiones antes del proxy
+  fastify.addHook("onRequest", async (request, reply) => {
+    const origin = request.headers.origin;
 
-  await fastify.register(require("@fastify/cors"), corsOptions);
-
-  fastify.addHook("onSend", async (request, reply) => {
-    const existingOrigin = reply.getHeader("access-control-allow-origin");
-    if (existingOrigin && existingOrigin !== "*") {
-      return;
+    if (origin && origins.includes(origin)) {
+      reply.header("Access-Control-Allow-Origin", origin);
+      reply.header("Access-Control-Allow-Credentials", "true");
+      reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie, X-Requested-With, Accept, Origin");
+      reply.header("Access-Control-Expose-Headers", "Set-Cookie, Authorization, X-Cache");
     }
-    const requestOrigin = request.headers.origin;
-    if (requestOrigin && origins.includes(requestOrigin)) {
-      reply.header("Access-Control-Allow-Origin", requestOrigin);
+
+    // Responde el preflight OPTIONS directamente — sin pasar al proxy
+    if (request.method === "OPTIONS") {
+      reply.code(204).send();
     }
   });
 });
