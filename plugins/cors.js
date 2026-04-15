@@ -3,7 +3,8 @@
 const fp = require("fastify-plugin");
 
 module.exports = fp(async function (fastify, opts) {
-  const origins = (process.env.CORS_ORIGINS || "")
+  const defaultOrigins = "https://auth-dncf1iwnd-axelisaak10s-projects.vercel.app";
+  const origins = (process.env.CORS_ORIGINS || defaultOrigins)
     .split(",")
     .map((o) => o.trim())
     .filter((o) => o);
