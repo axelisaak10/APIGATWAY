@@ -48,6 +48,7 @@ module.exports = fp(async function (fastify, opts) {
       cookie: "",
       authorization: authHeader,
       host: new URL(TICKETS_SERVICE_URL).host,
+      'accept-encoding': 'identity',
     };
   };
 
